@@ -19,16 +19,12 @@ def post(username: str):
             P("@hamelsmu is the author of this app, so he has the privilege of showing you this message instead :)")
         )
     
+    events = requests.get(f"https://api.github.com/users/{username}/events/public", timeout=10).json()    
     emails = set()
-    response = requests.get(f"https://api.github.com/users/{username}/events/public")
-    events = response.json()
-    
     for event in events:
-        commits = event.get('payload', {}).get('commits', [])
-        for commit in commits:
+        for commit in event.get('payload', {}).get('commits', []):
             author = commit.get('author', {})
-            name = author.get('name', '')
-            email = author.get('email', '')
+            name, email = author.get('name'), author.get('email')
             if name and email and 'github-action' not in name:
                 emails.add(f"{name}: {email}")
     
