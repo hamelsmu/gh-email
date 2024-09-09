@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GitHub Email Finder</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        input, button { margin: 10px 0; padding: 5px; }
+        #result { margin-top: 20px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Find An Email With A GitHub Username</h1>
+    <p>This app was made with Flask and HTMX. <a href="https://github.com/hamelsmu/pyscript-getemail/tree/main">See the original code!</a></p>
+    
+    <form hx-post="/get_emails" hx-target="#result">
+        <label><strong>Input a GitHub username 👉 </strong>
+            <input name="username" type="text" required>
+        </label>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <p>All names and emails contained in recent public commit history will be displayed below:</p>
+    <div id="result"></div>
+</body>
+</html>
