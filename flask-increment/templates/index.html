@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMX Counter Example</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</head>
+<body>
+    <h1>HTMX Counter</h1>
+    
+    <button id="counterButton" 
+            hx-trigger="click[incrementCounter()]"
+            hx-swap="innerHTML">
+        Count: 0
+    </button>
+    <script>
+        let count = 0;
+        function incrementCounter() {
+            count++;
+            document.getElementById('counterButton').innerHTML = `Count: ${count}`;
+        }
+    </script>
+</body>
+</html>
