@@ -1,0 +1,20 @@
+.copy-btn {
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 8px;
+    color: #666;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+.copy-btn:hover {
+    color: #333;
+}
+.copy-btn.copied, .green-check {
+    color: green;
+}
+.copy-btn.copied:focus {
+    outline: none;
+    border: none;
+}
