@@ -1,22 +1,16 @@
 function copyToClipboard(event, email) {
-    event.preventDefault();
+    halt(event);
     navigator.clipboard.writeText(email)
       .then(() => {
-        const btn = event.target.closest('.copy-btn');
-        btn.classList.add('copied');
-        const textSpan = btn.querySelector('.button-text');
-        textSpan.textContent = 'Copied';
+        const btn = me('.copy-btn').classAdd('copied');
+        const textSpan = me('.button-text').textContent('Copied');                  
+        const icon = btn('i').classAdd('fas fa-check green-check');
                   
-        const icon = btn.querySelector('i');
-        icon.classList = 'fas fa-check green-check';
-                  
-        setTimeout(() => {
-          btn.classList.remove('copied');
+        sleep(1500, () => {
+          btn.classRemove('copied');
           textSpan.textContent = 'Copy';
           icon.classList = 'fas fa-copy';
-        }, 1500);
+        });
       })
-      .catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
+      .catch(err => {console.error('Failed to copy text: ', err)});
 }

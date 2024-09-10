@@ -11,14 +11,14 @@ app, rt = fast_app(hdrs=(fa, bttn_style, copyfn))
 def get():
     return (
         Title("GitHub Email Finder"), 
-        Main(
+        Container(
             Grid(H1("GitHub Email Finder"),
                 Div(A("See Code on", I(cls="fab fa-github"), href="https://github.com/hamelsmu/gh-email/tree/main/fasthtml"), style="text-align: right;")),
             Form(hx_post="/get_emails", hx_target="#results")(
                 Input(name="username", placeholder="Enter a GitHub username"),
                 Button("Get Emails", type="submit")),
-            Div(id="results"),
-       cls="container")
+            Div(id="results")
+        )
     )
 
 @rt("/get_emails")
@@ -27,30 +27,31 @@ def post(username: str):
         return P("@hamelsmu is the author of this app, so he has the privilege of showing you this message instead :)")
     
     events = httpx.get(f"https://api.github.com/users/{username}/events/public", timeout=10).json()   
-    emails = set()
+    emails = {}
     for event in events:
         for commit in event.get('payload', {}).get('commits', []):
             author = commit.get('author', {})
             name, email = author.get('name'), author.get('email')
             if name and email and 'github-action' not in name:
-                emails.add(f"{name}: {email}")
+                emails[email] = name
     
     if emails:
-        return Div(
-            H2("Results"),
-            Table(Tr(Th("Name"), Th("Email")),
-                *[Tr(Td(name), Td(Code(email, cls="email-text"),
-                            Button(I(cls="fas fa-copy"),
-                                Span("Copy", cls="button-text"),
-                                cls="copy-btn",
-                                hx_on_click=f"copyToClipboard(event, '{email}')"
-                            )
-                        )
-                    ) for name, email in (email.split(": ", 1) for email in emails)
-                ]
-            )
+        return Div(H2("Results"),
+                   Table(
+                       Tr(Th("Name"), Th("Email")),
+                         *[render_email(n,e) for e,n in emails.items()]
+                   )
+               )
+    else: return P("No emails found")
+
+def render_email(name: str, email: str) -> Tr:
+    return Tr(
+        Td(name),
+        Td(Code(email, cls="email-text"),
+           Button(I(cls="fas fa-copy"), Span("Copy", cls="button-text"),
+                  cls="copy-btn",
+                  hx_on_click=f"copyToClipboard(event, '{email}')")
         )
-    else:
-        return P("No emails found")
+    )
 
 serve()
