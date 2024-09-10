@@ -41,7 +41,7 @@ function copyToClipboard(event, email) {
         btn.classList.remove('copied');
         textSpan.textContent = 'Copy';
         icon.classList = 'fas fa-copy';
-      }, 2000);
+      }, 1500);
     })
     .catch(err => {
       console.error('Failed to copy text: ', err);
