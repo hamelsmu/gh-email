@@ -1,7 +1,57 @@
 from fasthtml.common import *
 import httpx
 
-app, rt = fast_app()
+bttn_style = Style("""
+.copy-btn {
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 8px;
+    color: #666;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+.copy-btn:hover {
+    color: #333;
+}
+.copy-btn.copied, .green-check {
+    color: green;
+}
+.copy-btn.copied:focus {
+    outline: none;
+    border: none;
+}
+""")
+
+copyfn = Script("""
+function copyToClipboard(event, email) {
+  event.preventDefault();
+  navigator.clipboard.writeText(email)
+    .then(() => {
+      const btn = event.target.closest('.copy-btn');
+      btn.classList.add('copied');
+      const textSpan = btn.querySelector('.button-text');
+      textSpan.textContent = 'Copied';
+                
+      const icon = btn.querySelector('i');
+      icon.classList = 'fas fa-check green-check';
+                
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        textSpan.textContent = 'Copy';
+        icon.classList = 'fas fa-copy';
+      }, 2000);
+    })
+    .catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+}
+""")
+
+app, rt = fast_app(hdrs=(Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"), 
+                         bttn_style,
+                         copyfn))
 
 @rt("/")
 def get():
@@ -9,7 +59,7 @@ def get():
         Title("GitHub Email Finder"), 
         Main(
             Grid(H1("GitHub Email Finder"),
-                Div(A("See Code on GitHub", href="https://github.com/hamelsmu/gh-email/tree/main/fasthtml"), style="text-align: right;")
+                Div(A("See Code on", I(cls="fab fa-github"), href="https://github.com/hamelsmu/gh-email/tree/main/fasthtml"), style="text-align: right;")
             ),
             Form(hx_post="/get_emails", hx_target="#results")(
                 Input(name="username", placeholder="Enter a GitHub username"),
@@ -17,7 +67,7 @@ def get():
             ),
             Div(id="results"),
        cls="container")
-)
+    )
 
 @rt("/get_emails")
 def post(username: str):
@@ -34,7 +84,26 @@ def post(username: str):
                 emails.add(f"{name}: {email}")
     
     if emails:
-        return Ul(*[Li(email) for email in emails])
+        return Div(
+            H2("Results"),
+            Table(
+                Tr(Th("Name"), Th("Email")),
+                *[
+                    Tr(
+                        Td(name),
+                        Td(
+                            Code(email, cls="email-text"),
+                            Button(
+                                I(cls="fas fa-copy"),
+                                Span("Copy", cls="button-text"),
+                                cls="copy-btn",
+                                hx_on_click=f"copyToClipboard(event, '{email}')"
+                            )
+                        )
+                    ) for name, email in (email.split(": ", 1) for email in emails)
+                ]
+            )
+        )
     else:
         return P("No emails found")
 
